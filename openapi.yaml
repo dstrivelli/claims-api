@@ -1,307 +1,3369 @@
+---
 openapi: 3.0.1
 info:
-  title: Swagger Petstore
-  description: 'This is a sample server Petstore server.  You can find out more about     Swagger
-    at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).      For
-    this sample, you can use the api key `special-key` to test the authorization     filters.'
-  termsOfService: http://swagger.io/terms/
-  contact:
-    email: apiteam@swagger.io
+  title: Claims API
+  description: "<p>This API provides functionality around the C&P Benefit Claim and
+    seeks to provide simple and concise mechanisms to create and view claim information.
+    The functionality falls within two primary areas.<br/> <ul><li>Claim - The ability
+    to create, list, and view summaries for a Veteran's claims.</li><li>Contention
+    - The ability to create, update, delete, and view contention summaries for a given
+    claim.</li></ul> </p> <p>The consumers of this service are expected to participate
+    with other authoritative systems in the VA context. A key design principle with
+    the Claims API is to avoid the one-call-does-everything pattern that has proven
+    to reduce reusability of services and to stovepipe functionality for individual
+    use case. Within the BIP service paradigm, this API would be considered a Process
+    API, designed to encapsulate the specific domain actions around claims.</p>"
+  termsOfService: https://developer.va.gov/terms-of-service
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.18.1
 externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
+  description: Complete documentation describing how to use this API
+  url: https://github.ec.va.gov/EPMO/bip-vetservices-claims
 servers:
-- url: https://petstore.swagger.io/v2
-- url: http://petstore.swagger.io/v2
+- url: "/"
 tags:
-- name: pet
-  description: Everything about your Pets
-  externalDocs:
-    description: Find out more
-    url: http://swagger.io
-- name: store
-  description: Access to Petstore orders
-- name: user
-  description: Operations about user
-  externalDocs:
-    description: Find out more about our store
-    url: http://swagger.io
+- name: claims
+  description: A tag that organizes resources directly associated with a claim.
+- name: lookup
+  description: A tag that organizes resources dedicated solely as lookup data
+- name: contentions
+  description: A tag that organizes resources for contentions within a given claim.
+- name: token
+  description: Token Resource
 paths:
-  /pet:
-    put:
-      tags:
-      - pet
-      summary: Update an existing pet
-      operationId: updatePet
-      requestBody:
-        description: Pet object that needs to be added to the store
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Pet'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Pet'
-        required: true
-      responses:
-        400:
-          description: Invalid ID supplied
-          content: {}
-        404:
-          description: Pet not found
-          content: {}
-        405:
-          description: Validation exception
-          content: {}
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-      x-codegen-request-body-name: body
-    post:
-      tags:
-      - pet
-      summary: Add a new pet to the store
-      operationId: addPet
-      requestBody:
-        description: Pet object that needs to be added to the store
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Pet'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Pet'
-        required: true
-      responses:
-        405:
-          description: Invalid input
-          content: {}
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-      x-codegen-request-body-name: body
-  /pet/findByStatus:
+  "/api/v1/claims":
     get:
       tags:
-      - pet
-      summary: Finds Pets by status
-      description: Multiple status values can be provided with comma separated strings
-      operationId: findPetsByStatus
+      - claims
+      summary: Get summaries of claims for a given Veteran
+      operationId: getClaimsByVeteran
       parameters:
-      - name: status
+      - name: include_closed
         in: query
-        description: Status values that need to be considered for filter
-        required: true
+        description: Whether or not to list closed claims. Default is false.
+        required: false
         style: form
         explode: true
         schema:
-          type: array
-          items:
-            type: string
-            default: available
-            enum:
-            - available
-            - pending
-            - sold
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-        400:
-          description: Invalid status value
-          content: {}
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-  /pet/findByTags:
-    get:
-      tags:
-      - pet
-      summary: Finds Pets by tags
-      description: Muliple tags can be provided with comma separated strings. Use         tag1,
-        tag2, tag3 for testing.
-      operationId: findPetsByTags
-      parameters:
-      - name: tags
-        in: query
-        description: Tags to filter by
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: array
-          items:
-            type: string
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/xml:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Pet'
-        400:
-          description: Invalid tag value
-          content: {}
-      deprecated: true
-      security:
-      - petstore_auth:
-        - write:pets
-        - read:pets
-
-components:
-  schemas:
-    Order:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        petId:
-          type: integer
-          format: int64
-        quantity:
-          type: integer
-          format: int32
-        shipDate:
-          type: string
-          format: date-time
-        status:
-          type: string
-          description: Order Status
-          enum:
-          - placed
-          - approved
-          - delivered
-        complete:
           type: boolean
           default: false
-      xml:
-        name: Order
-    Category:
-      type: object
-      properties:
-        id:
+      - name: offset
+        in: query
+        description: The number of items to skip before starting to collect the claims
+          to list
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 0
           type: integer
-          format: int64
-        name:
-          type: string
-      xml:
-        name: Category
-    User:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        username:
-          type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        phone:
-          type: string
-        userStatus:
-          type: integer
-          description: User Status
           format: int32
-      xml:
-        name: User
-    Tag:
-      type: object
-      properties:
-        id:
+          default: 0
+      - name: limit
+        in: query
+        description: The number of items to include in the page of results
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          format: int32
+          default: 20
+      - name: veteran_participant_id
+        in: query
+        description: The veteran's CorpDB Participant ID.
+        required: true
+        style: form
+        explode: true
+        schema:
+          maximum: 999999999999999
           type: integer
           format: int64
-        name:
+        examples:
+          veteranWithClaims:
+            summary: Veteran has claims
+            value: 320848
+          veteranWithoutClaims:
+            summary: Veteran without claims
+            value: 68
+          Max:
+            summary: Veteran that doesn't exist with max value for id
+            value: 999999999999999
+      - name: claims_at_date
+        in: query
+        description: If specified, only includes claims that were recieved before
+          or at the given date. If include_closed is false, will return claims that
+          were open at the provided date (which may have subsequently been closed).
+        required: false
+        style: form
+        explode: true
+        schema:
           type: string
-      xml:
-        name: Tag
-    Pet:
-      required:
-      - name
-      - photoUrls
-      type: object
-      properties:
-        id:
+          format: date-time
+      - name: service_type_code
+        in: query
+        description: If specified, only returns claims of the given service type.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: program_type_code
+        in: query
+        description: If specified, only return claims of the given program type.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: A list of claim summaries for the given veteran.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClaimSummariesResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - claims
+      summary: Create a new claim
+      description: Create a new claim with only the minimal information. The Claims
+        API assumes the consumer will have ensured CorpDB contains the Veteran, Claimant
+        (if different than Veteran), and Address.
+      externalDocs:
+        description: Claim Creation documentation
+        url: https://github.ec.va.gov/EPMO/bip-vetservices-claims/blob/development/bip-vetservices-claims-docs/claim-creation.md
+      operationId: createClaim
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateClaimRequest"
+        required: true
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CreateClaimResponse"
+          links:
+            GetClaimById:
+              operationId: getClaim
+              parameters:
+                claimId: "$response.body#/[claimId]"
+              description: Access claim summary information for a specific claim,
+                using the claimId
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '412':
+          description: Precondition Failed
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}":
+    description: The resource representing a specific claim.
+    get:
+      tags:
+      - claims
+      summary: Access claim summary information for a claim, using the claimId
+      description: Get the claim summary for a claim ID. This is the use case for
+        getting claim information regardless of veteran.
+      operationId: getClaimById
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
           type: integer
           format: int64
-        category:
-          $ref: '#/components/schemas/Category'
-        name:
+        examples:
+          oneId:
+            summary: To get a single claim summary
+            value: 9666958
+      responses:
+        '200':
+          description: Details for the given claim id.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClaimDetailResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - claims
+      summary: Update an existing claim
+      description: Update suspense status for existing claim.  Other data points are
+        not implemented yet.
+      externalDocs:
+        description: Claim Update documentation
+        url: https://github.ec.va.gov/EPMO/bip-vetservices-claims/blob/development/bip-vetservices-claims-docs/claim-updates.md
+      operationId: updateClaim
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            summary: To update a single claim
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateClaimRequest"
+        required: true
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UpdateClaimResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '412':
+          description: Precondition Failed
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      deprecated: true
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/update/benefitclaimtypecode":
+    put:
+      tags:
+      - claims
+      summary: Operation to update the benefit claim type code of an existing claim
+      description: Operation to update the benefit claim type code of an existing
+        claim. An example of benefit claim type code is 140ISCDPMC
+      operationId: updateBenefitClaimTypeCode
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/updateBenefitClaimTypeCodeRequest"
+        required: true
+      responses:
+        '200':
+          description: Benefit Claim Type Code updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/updateBenefitClaimTypeCodeResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/suspense":
+    description: The resource representing a specific claim.
+    get:
+      tags:
+      - claims
+      summary: Get the claim suspense statuses of an existing claim
+      operationId: getClaimSuspenseStatuses
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      - name: include_history
+        in: query
+        description: Whether or not to include to claim suspense status history. Default
+          is false.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      - name: reason_code
+        in: query
+        description: Filter the claim suspese statuses by this reason code.
+        required: false
+        style: form
+        explode: true
+        schema:
           type: string
-          example: doggie
-        photoUrls:
+      responses:
+        '200':
+          description: A list of claim suspense statuses for an existing claim.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClaimSuspenseStatusesResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '412':
+          description: Precondition Failed
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - claims
+      summary: Update the suspense of an existing claim
+      description: Update the suspense of an existing claim
+      externalDocs:
+        description: Claim Update documentation
+        url: https://github.ec.va.gov/EPMO/bip-vetservices-claims/blob/development/bip-vetservices-claims-docs/claim-updates.md
+      operationId: updateClaimSuspense
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateClaimSuspenseRequest"
+        required: true
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UpdateClaimSuspenseResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/lifecycle_status":
+    description: The resource representing a specific claim's lifecycle status.
+    get:
+      tags:
+      - claims
+      summary: Get the lifecycle status(es) of an existing claim
+      operationId: getClaimLifecycleStatuses
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          ID 1:
+            value: 9729039
+          ID 2:
+            value: 9730579
+      - name: include_history
+        in: query
+        description: Whether or not to include historical lifecycle status updates.
+          Default is false.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: The suspense status list for an existing claim.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ClaimLifecycleStatusesResponse"
+              example:
+                lifecycleStatuses:
+                - lifecycleStatusTypeCode: RFD
+                  lifecycleStatusTypeName: Ready for Decision
+                  lifecycleStatusReasonTypeCode: '54'
+                  lifecycleStatusReasonTypeName: Worked in VETSNET Awards
+                  reasonDetailTypeCode: 03B
+                  reasonDetailTypeName: Financial Issues
+                  reasonText: Reason Text
+                  changedDate: '2009-10-27T00:00:00-05:00'
+                  closedDate: '2009-10-27T00:00:00-05:00'
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '412':
+          description: Precondition Failed
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - claims
+      summary: Update the lifecycle status of an existing claim
+      description: Update the lifecycle status of an existing claim
+      externalDocs:
+        description: Claim Update documentation
+        url: https://github.ec.va.gov/EPMO/bip-vetservices-claims/blob/development/bip-vetservices-claims-docs/claim-updates.md
+      operationId: updateClaimLifecycleStatus
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateClaimLifecycleStatusRequest"
+        required: true
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UpdateClaimLifecycleStatusResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/temporary_station_of_jurisdiction":
+    description: The resource representing a specific claim.
+    put:
+      tags:
+      - claims
+      summary: Update the temporary station of jurisdiction of an existing claim
+      description: Update the temporary station of jurisdiction of an existing claim
+      operationId: updateClaimTempStationOfJurisdiction
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateClaimTemporaryStationOfJurisdictionRequest"
+        required: true
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UpdateClaimTemporaryStationOfJurisdictionResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/close":
+    put:
+      tags:
+      - claims
+      summary: Operation to close an existing claim
+      description: Operation to close an existing claim. The claim must not already
+        be closed or cancelled.
+      operationId: closeClaim
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CloseClaimRequest"
+        required: true
+      responses:
+        '200':
+          description: Claim Closed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CloseClaimResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/cancel":
+    put:
+      tags:
+      - claims
+      summary: Operation to cancel an existing claim
+      description: Operation to cancel an existing claim. The claim must not already
+        be closed or cancelled.
+      operationId: cancelClaim
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+        examples:
+          oneId:
+            value: 9729039
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CloseClaimRequest"
+        required: true
+      responses:
+        '200':
+          description: Claim Closed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CloseClaimResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/contentions":
+    description: The resource representing contentions within a given claim.
+    get:
+      tags:
+      - contentions
+      summary: List summaries for contentions associated with a given claim.
+      operationId: getContentionsForClaim
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          example: 600049950
+      responses:
+        '200':
+          description: A list of contention summary objects
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ContentionSummariesResponse"
+        '204':
+          description: No contentions found for the claim
+          content:
+            application/json: {}
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: Could not derive claim from request path
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.claim.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Claim not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+    put:
+      tags:
+      - contentions
+      summary: Updates one or more contentions
+      operationId: updateContentions
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          example: 600049950
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateContentionsRequest"
+        required: true
+      responses:
+        '200':
+          description: Response indicates successful updates. May have messages with
+            any warnings.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UpdateContentionsResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '501':
+          description: Resource not implemented
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - contentions
+      summary: Creates one or more Contentions for a claim
+      operationId: createContentions
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          example: 600049950
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateContentionsRequest"
+        required: true
+      responses:
+        '201':
+          description: A list of contention ids of the created contentions, in the
+            same order as the creation request.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CreateContentionsResponse"
+          links:
+            getContentionsById:
+              operationId: getContentionsById
+              parameters:
+                contentionIds: "$response.body#/[contentionIds]"
+              description: Returns contention summaries for contention ids.
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/{claimId}/contentions/{contentionIds}":
+    get:
+      tags:
+      - contentions
+      summary: Gets contentions by ID from a specific claim
+      operationId: getContentionsById
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          example: 600049950
+      - name: contentionIds
+        in: path
+        description: The contention IDs to operate on.
+        required: true
+        style: simple
+        explode: false
+        schema:
           type: array
-          xml:
-            name: photoUrl
-            wrapped: true
+          items:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: A list of contention summary objects
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ContentionSummariesResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: The requested resource could not be found.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Resource not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - contentions
+      summary: Deletes one or more contentions
+      operationId: deleteContentions
+      parameters:
+      - name: claimId
+        in: path
+        description: The CorpDB BNFT_CLAIM_ID
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+          format: int64
+          example: 600049950
+      - name: contentionIds
+        in: path
+        description: The contention IDs to operate on.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: array
+          items:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Response indicates successful deletions. May have messages
+            with any warnings.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.validator.method.argument.not.valid
+                  severity: ERROR
+                  status: 400
+                  text: Argument not valid.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '404':
+          description: The requested resource could not be found.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.vetservices.claims.not.found
+                  severity: ERROR
+                  status: 404
+                  text: Resource not found
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/benefit_claim_types":
+    get:
+      tags:
+      - lookup
+      - claims
+      summary: Get benefit claim types.
+      operationId: benefitClaimTypeLookup
+      parameters:
+      - name: service_type_code
+        in: query
+        description: Allows filtering on a given service type
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          compAndPension:
+            summary: To show only the programs within Compensation and Pension
+            value: CP
+      - name: program_type_code
+        in: query
+        description: Allows filtering on a given program type
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          compAndPension:
+            summary: To show only the programs within Compensation and Pension
+            value: CPD
+      - name: payee_code
+        in: query
+        description: Allows filtering on a given service type
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          compAndPension:
+            summary: To filter based on payee relationship codes
+            value: '00'
+      responses:
+        '200':
+          description: A list of benefit claim types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/BenefitClaimTypesResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/pre_discharge_types":
+    get:
+      tags:
+      - lookup
+      - claims
+      summary: Get active pre-discharge values.
+      description: A resource representing active pre-discharge types. For example
+        "BDD", "IDES", "Quick Start"
+      operationId: preDischargeTypeLookup
+      responses:
+        '200':
+          description: A list of active pre-discharge type CodeNamePair objects (code,
+            name, description).
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/service_types":
+    get:
+      tags:
+      - lookup
+      summary: Gets VA service types
+      description: A resource representing the VA service types. For example, "Education",
+        "Compensation and Pension", "Insurance", etc
+      operationId: serviceTypeLookup
+      responses:
+        '200':
+          description: A list of service type CodeNamePair objects (code, name, description).
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/program_types":
+    get:
+      tags:
+      - lookup
+      summary: Gets VA program types filtered by service type
+      description: A resource representing the VA program types. For example, "Chapter
+        33", "Compensation", "Pension", etc
+      operationId: programTypeLookup
+      parameters:
+      - name: service_type_code
+        in: query
+        description: Allows filtering on a given service_type.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+        examples:
+          compAndPension:
+            summary: To show only the programs within Compensation and Pension
+            value: ?service_type_code="CP"
+      responses:
+        '200':
+          description: A list of program type CodeNamePair objects (code, name, description).
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/contentions/contention_types":
+    get:
+      tags:
+      - lookup
+      - contentions
+      summary: Lists contention types.
+      operationId: getContentionTypes
+      responses:
+        '200':
+          description: A list of all contention types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/contentions/contention_classification_types":
+    get:
+      tags:
+      - lookup
+      - contentions
+      summary: Lists contention classification types.
+      operationId: getContentionClassificationTypes
+      responses:
+        '200':
+          description: A list of all contention classification types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/contentions/special_issue_types":
+    get:
+      tags:
+      - lookup
+      - contentions
+      summary: Lists special issue types types.
+      operationId: getSpecialIssueTypes
+      responses:
+        '200':
+          description: A list of all special issue types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/contentions/original_source_types":
+    get:
+      tags:
+      - lookup
+      - contentions
+      summary: Lists original source types.
+      operationId: getOriginalSourceTypes
+      responses:
+        '200':
+          description: A list of all original source types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/contentions/diagnostic_types":
+    get:
+      tags:
+      - lookup
+      - contentions
+      summary: Lists diagnostic types.
+      operationId: getDiagnosticTypes
+      responses:
+        '200':
+          description: A list of all diagnostic types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/suspense_reason_types":
+    get:
+      tags:
+      - lookup
+      - claims
+      summary: Lists suspense reason types.
+      operationId: getSuspenseReasonTypes
+      responses:
+        '200':
+          description: A list of all suspense Reason types.
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/SuspenseReasonTypesResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/claims/lc_status_reason_types":
+    get:
+      tags:
+      - lookup
+      summary: Lists lifecycle closing status reason types.
+      operationId: getLcStatusReasonTypes
+      responses:
+        '200':
+          description: A list of all Lc status reason types
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CodeNamePairsResponse"
+        '401':
+          description: The authentication mechanism failed and hence access is forbidden.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: UNAUTHORIZED
+                  severity: ERROR
+                  status: 401
+                  text: No JWT Token in Header.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+              example:
+                messages:
+                - key: bip.framework.global.general.exception
+                  severity: ERROR
+                  status: 500
+                  text: Unexpected exception.
+                  timestamp: '2019-08-29T18:40:22.766Z'
+      security:
+      - bearerAuth: []
+  "/api/v1/token":
+    post:
+      tags:
+      - token
+      summary: Get JWT Token
+      description: Get a JWT bearer token with 'person' data.
+      externalDocs:
+        description: Security documentation with code examples
+        url: https://github.ec.va.gov/EPMO/bip-vetservices-claims/blob/development/bip-vetservices-claims-docs/new-integration-partners.md
+      operationId: getTokenUsingPOST
+      requestBody:
+        description: Identity information for the authenticated user. Application
+          Credentials (Issuer/Secret) and Application ID must be registered before
+          using the API.
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/Person"
+        required: true
+      responses:
+        '200':
+          description: A Response which indicates a successful Request.  The Response
+            may contain "messages" that could describe warnings or further information.
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  This request shouldn't be retried until corrected.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '403':
+          description: The request is not authorized.  Please verify credentials used
+            in the request.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+        '500':
+          description: There was an error encountered processing the Request.  Response
+            will contain a  "messages" element that will provide further information
+            on the error.  Please retry.  If problem persists, please contact support
+            with a copy of the Response.
+          content:
+            application/problem+json:
+              schema:
+                "$ref": "#/components/schemas/ProviderResponse"
+components:
+  schemas:
+    BenefitClaimTypesResponse:
+      title: BenefitClaimTypeResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          benefitClaimTypes:
+            type: array
+            items:
+              "$ref": "#/components/schemas/BenefitClaimType"
+    BenefitClaimType:
+      title: BenefitClaimType
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the BeneifitClaimType.
+        code:
+          type: string
+        description:
+          type: string
+        deactiveDate:
+          type: string
+          description: Date indicating when this item is deactivated and is no longer
+            valid, or an empty value.
+          format: date-time
+        attribute_one:
+          type: string
+          description: An additional discriminator key name to give further resolution
+            on a 3-digit code. The value is typically "CLAIM_TYPE_LABEL"
+        attribute_one_text:
+          type: string
+          description: The value of the attribute_one key. For example, it could be
+            "Work Item", "Compensation", "Predetermination", etc
+        attribute_two:
+          type: string
+          description: A second field attribute key name. This value is typically
+            "USER_DISPLAY"
+        attribute_two_text:
+          type: string
+          description: The value of the attribute_two key.
+        attribute_three:
+          type: string
+          description: A third field attribute key name. It usually relates to whether
+            the BenefitClaimType is Ratings
+        attribute_three_text:
+          type: string
+          description: The value of the attribute_three key.
+      description: The object used to specify a claim type. This object gives a higher
+        level of granularity to claim types, especially when there are only 9 modifiers.
+        Using this object will remove the need to specify EP code or label in separate
+        fields. The values reflected in this object reflect the values that go into
+        the m21-4 manuals, the authoritative specifications for claims.
+    SuspenseReasonTypesResponse:
+      title: SuspenseReasonTypesResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          suspenseReasonTypes:
+            type: array
+            items:
+              "$ref": "#/components/schemas/SuspenseReasonType"
+    SuspenseReasonType:
+      title: SuspenseReasonType
+      type: object
+      properties:
+        name:
+          type: string
+          description: The explanation regarding a pause in claim processing, such
+            as waiting for a response to an information request. Many claim actions
+            have built-in suspense reasons that are either automatically recorded,
+            or selected from a list by the user.
+        code:
+          type: string
+        days:
+          type: string
+          description: The number of suspense days for this suspense reason.
+      description: The object used to specify when a claim is due to be completed.
+    CreateClaimRequest:
+      title: CreateClaimRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - benefitClaimTypeCode
+        - claimant
+        - dateOfClaim
+        - programTypeCode
+        - serviceTypeCode
+        - veteran
+        type: object
+        properties:
+          serviceTypeCode:
+            type: string
+            description: Value selected from serviceTypeLookup result's CodeNamePair.code
+            example: CP
+          programTypeCode:
+            type: string
+            description: Value selected from programTypeLookup results's CodeNamePair.code
+            example: CPL
+          benefitClaimTypeCode:
+            type: string
+            description: Value selected from lookup service CodeNamePair.code
+            example: 110LCOMP
+          claimant:
+            "$ref": "#/components/schemas/Claimant"
+          veteran:
+            "$ref": "#/components/schemas/Veteran"
+          thirdDigitModifier:
+            type: string
+            description: Each claim with the same end product code must have a unique
+              third digit modifier. If not specified, one will be attempted to be
+              selected automatically.
+            example: '010'
+          preDischargeTypeCode:
+            type: string
+            description: Value selected from preDischargeTypeLookup CodeNamePair.code
+            example: IDES
+          dateOfClaim:
+            type: string
+            format: date-time
+          payeeTypeCode:
+            type: string
+            description: Code to indicate the payee type for the claim; default is
+              '00' for veteran
+            example: '10'
+          tempStationOfJurisdiction:
+            type: string
+            description: Regional office that the claim is currently routed to
+            example: '281'
+    CreateClaimResponse:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          claimId:
+            type: integer
+            description: The ID of the created claim
+            format: int64
+    ClaimSummariesResponse:
+      title: ClaimSummaryResponse
+      description: A response containing ClaimSummary objects
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          claims:
+            type: array
+            items:
+              "$ref": "#/components/schemas/ClaimSummary"
+    ClaimDetailResponse:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          claim:
+            "$ref": "#/components/schemas/ClaimDetail"
+    ClaimSummary:
+      title: ClaimSummary
+      type: object
+      properties:
+        summaryDateTime:
+          type: string
+          format: date-time
+        lastModified:
+          type: string
+          description: Date of the last time this object was modified
+          format: date-time
+        claimId:
+          type: integer
+          description: The CorpDB BNFT_CLAIM_ID
+          format: int64
+        benefitClaimType:
+          "$ref": "#/components/schemas/BenefitClaimType"
+        phase:
+          "$ref": "#/components/schemas/PhaseType"
+        phaseLastChangedDate:
+          type: string
+          format: date-time
+        claimLifecycleStatus:
+          type: string
+          description: Also called Lifecycle status. Describes the next type of work
+            that needs to be completed on a claim. Statuses are related to the lifecycle
+            in which the work will be completed, such as Rating Correction or Pending
+            Authorization.
+        completedDate:
+          type: string
+          format: date-time
+        claimant:
+          "$ref": "#/components/schemas/Claimant"
+        veteran:
+          "$ref": "#/components/schemas/Veteran"
+        receivedDate:
+          type: string
+          description: The date the claim was received.
+          format: date-time
+        payeeTypeCode:
+          type: string
+          description: Number and label that indicates the person receiving a benefit,
+            such as Veteran or spouse.
+          example: '010'
+        serviceTypeCode:
+          type: string
+          description: The service type code of the claim
+          example: CP
+        programTypeCode:
+          type: string
+          description: The program type code of the claim
+          example: CPL
+        endProductCode:
+          type: string
+          description: Modified end product code (including the increment/third digit
+            modifier). Part of the Benefits Delivery Network (BDN) Master Record indicating
+            the status conditions of the Veteran's pay record, in terms of benefit
+            payments.
+      description: An object to summarize the data in a claim. A claim is a formal
+        request for benefits that is submitted by a Veteran, or by a person or organization
+        authorized to act on a Veteran's behalf.
+    ClaimDetail:
+      title: ClaimDetail
+      description: An object to provide more detailed data for a specific claim. A
+        claim is a formal request for benefits that is submitted by a Veteran, or
+        by a person or organization authorized to act on a Veteran's behalf.
+      allOf:
+      - "$ref": "#/components/schemas/ClaimSummary"
+      - type: object
+        properties:
+          tempStationOfJurisdiction:
+            type: string
+            description: Represents the Regional Office (RO) where the claim is currently
+              being worked if different from the establishing RO
+          claimStationOfJurisdiction:
+            type: string
+            description: Represents the Regional Office (RO) where the claim currently
+              is assigned
+          awardStationOfJurisdiction:
+            type: string
+            description: Represents the Regional Office (RO) responsible for processing
+              maintenance awards for the veteran or claimant
+          suspense:
+            "$ref": "#/components/schemas/Suspense"
+          suspenseReasonCode:
+            type: string
+            description: The suspense reason code.
+            example: '024'
+            deprecated: true
+          suspenseDate:
+            type: string
+            description: The date the claim was suspended.
+            format: date-time
+            deprecated: true
+          suspenseComment:
+            type: string
+            example: Suspense Comment Example
+            deprecated: true
+          waiverSubmitted:
+            type: boolean
+          limitedPoa:
+            "$ref": "#/components/schemas/LimitedPoa"
+          establishedDate:
+            type: string
+            description: Date of the first lifecycle status change for the claim.
+            format: date-time
+    ClaimSuspenseStatusesResponse:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          suspenseStatuses:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Suspense"
+    ClaimLifecycleStatusesResponse:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          lifecycleStatuses:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Lifecycle"
+    Suspense:
+      title: Suspense
+      type: object
+      properties:
+        reason:
+          type: string
+          description: The explanation regarding a pause in claim processing, such
+            as waiting for a response to an information request. Many claim actions
+            have built-in suspense reasons that are either automatically recorded,
+            or selected from a list by the user.
+          example: Pending Authorization
+        reasonCode:
+          type: string
+          description: The suspense reason code.
+          example: '024'
+        date:
+          type: string
+          description: Acts as a due date or reminder date for either a tracked item
+            or a claim. The claim suspense date will usually be the same as the suspense
+            date of the earliest, actionable tracked item.
+          format: date-time
+        comment:
+          type: string
+          example: Suspense Comment Example
+      description: The time during which a work item or claim is inactive or waiting
+        completion of an action from an outside entity, such as waiting for evidence
+        requested from the claimant or a third party. Receipt of the evidence will
+        lift the suspense and allow the claim to move forward through processing.
+    Lifecycle:
+      title: Lifecycle
+      type: object
+      properties:
+        lifecycleStatusTypeCode:
+          type: string
+          description: Type code corresponding to BNFT_CLAIM_LC_STATUS_TYPE group
+            type name in CorpDB
+          example: RFD
+        lifecycleStatusTypeName:
+          type: string
+          description: Type name corresponding to BNFT_CLAIM_LC_STATUS_TYPE group
+            type name in CorpDB
+          example: Ready for Decision
+        lifecycleStatusReasonTypeCode:
+          type: string
+          description: Type code corresponding to LC_STATUS_REASON_TYPE group type
+            name in CorpDB
+          example: '54'
+        lifecycleStatusReasonTypeName:
+          type: string
+          description: Type name corresponding to LC_STATUS_REASON_TYPE group type
+            name in CorpDB
+          example: Worked in VETSNET Awards
+        reasonDetailTypeCode:
+          type: string
+          description: Type code corresponding to REASON_DETAIL_TYPE group type name
+            in CorpDB
+          example: 03B
+        reasonDetailTypeName:
+          type: string
+          description: Type name corresponding to REASON_DETAIL_TYPE group type name
+            in CorpDB
+          example: Financial Issues
+        reasonText:
+          type: string
+          description: Free-form LC status update reason
+          example: Reason Text
+        changedDate:
+          type: string
+          description: Date of the LC status update for the claim
+          format: date-time
+        closedDate:
+          type: string
+          description: Closed date for the claim
+          format: date-time
+      description: Status updates for the lifecycle of a claim
+    LimitedPoa:
+      title: LimitedPoa
+      type: object
+      properties:
+        veteranParticipantId:
+          maximum: 999999999999999
+          type: integer
+          description: Participant ID of veteran
+          format: int64
+          example: 307405
+        claimantParticipantId:
+          maximum: 999999999999999
+          type: integer
+          description: Participant ID of claimant
+          format: int64
+          example: 307405
+        poaParticipantId:
+          maximum: 999999999999999
+          type: integer
+          description: Participant ID of limited POA
+          format: int64
+          example: 307405
+        poaCode:
+          type: string
+          description: Code of limited POA
+          example: '6'
+        startDate:
+          type: string
+          description: Start date of the POA representation for this claim
+          format: date-time
+      description: Limited Power of Attorney (POA) representation. A Veteran Service
+        Organization (VSO) or other individual appointed by the Veteran or claimant
+        who represents their interests.Limited representation is only for a specific
+        claim, versus a general POA that can be associated with all claims for a claimant.
+    ContentionStatusTypeCode:
+      title: ContentionStatusTypeCode
+      type: string
+      description: "<table> <thead><tr><td>Code</td><td>Name</td></tr></thead> <tbody>
+        <tr><td>C</td><td>Complete</td></tr> <tr><td>D</td><td>Deferred</td></tr>
+        <tr><td>P</td><td>Pending</td></tr> </tbody> </table>"
+      enum:
+      - C
+      - D
+      - P
+    CodeNamePairsResponse:
+      title: CodeNamePairsResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          codeNamePairs:
+            type: array
+            items:
+              "$ref": "#/components/schemas/CodeNamePair"
+    CodeNamePair:
+      title: CodeNamePair
+      required:
+      - code
+      - deactiveDate
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        deactiveDate:
+          type: string
+          description: Date indicating when this item is deactivated and is no longer
+            valid, or an empty value.
+          format: date-time
+    ContentionSummariesResponse:
+      title: ContentionSummariesResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          contentions:
+            type: array
+            items:
+              "$ref": "#/components/schemas/ContentionSummary"
+    CreateContentionsRequest:
+      title: CreateContentionsRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - claimId
+        - createContentions
+        type: object
+        properties:
+          createContentions:
+            type: array
+            items:
+              "$ref": "#/components/schemas/Contention"
+    ContentionSummary:
+      title: ContentionSummary
+      allOf:
+      - "$ref": "#/components/schemas/ExistingContention"
+      - type: object
+        properties:
+          summaryDateTime:
+            type: string
+            format: date-time
+    Contention:
+      title: Contention
+      required:
+      - beginDate
+      - claimantText
+      - classificationType
+      - contentionTypeCode
+      - medicalInd
+      type: object
+      properties:
+        medicalInd:
+          type: boolean
+        beginDate:
+          type: string
+          format: date-time
+        completedDate:
+          type: string
+          format: date-time
+        notificationDate:
+          type: string
+          format: date-time
+        contentionTypeCode:
+          type: string
+          example: NEW
+        classificationType:
+          type: integer
+          format: int64
+          example: 1250
+        diagnosticTypeCode:
+          type: string
+          example: '6100'
+        claimantText:
+          type: string
+          example: tendinitis/bilateral
+        contentionStatusTypeCode:
+          "$ref": "#/components/schemas/ContentionStatusTypeCode"
+        originalSourceTypeCode:
+          type: string
+          example: PHYS
+        specialIssueCodes:
+          type: array
+          example:
+          - 38USC1151
+          - AOOV
+          - ELIGIBILITY
           items:
             type: string
-        tags:
-          type: array
-          xml:
-            name: tag
-            wrapped: true
-          items:
-            $ref: '#/components/schemas/Tag'
-        status:
-          type: string
-          description: pet status in the store
-          enum:
-          - available
-          - pending
-          - sold
-      xml:
-        name: Pet
-    ApiResponse:
+            description: Special Issue Codes
+      description: A condition or diagnosis that a Veteran contends are the cause
+        of a current disability, and may qualify for benefits, if directly related
+        to a Veteran's military service.
+    CreateContentionsResponse:
+      title: CreateContentionResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+        properties:
+          contentionIds:
+            type: array
+            items:
+              type: integer
+              format: int64
+    UpdateContentionsRequest:
+      title: UpdateContentionsRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          updateContentions:
+            type: array
+            items:
+              "$ref": "#/components/schemas/ExistingContention"
+    UpdateContentionsResponse:
+      title: UpdateContentionResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+      - type: object
+    ExistingContention:
+      title: ExistingContention
+      allOf:
+      - "$ref": "#/components/schemas/Contention"
+      - required:
+        - contentionId
+        - lastModified
+        type: object
+        properties:
+          contentionId:
+            type: integer
+            format: int64
+            example: 5261
+          lastModified:
+            type: string
+            description: Last modified time for the contention being updated. If this
+              does not match, the update will be rejected.
+            format: date-time
+    UpdateClaimRequest:
+      title: UpdateClaimRequest
+      deprecated: true
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          suspenseReasonCode:
+            type: string
+            example: '024'
+          suspenseDate:
+            type: string
+            format: date-time
+          commentText:
+            type: string
+            example: Adding custom text
+    UpdateClaimResponse:
+      title: UpdateClaimResponse
+      deprecated: true
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    UpdateClaimSuspenseRequest:
+      title: UpdateClaimSuspenseRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          suspenseReasonCode:
+            type: string
+            example: '024'
+          suspenseDate:
+            type: string
+            format: date-time
+          suspenseComment:
+            type: string
+            example: Adding custom text
+    UpdateClaimSuspenseResponse:
+      title: UpdateClaimSuspenseResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    UpdateClaimLifecycleStatusRequest:
+      title: UpdateClaimLifecycleStatusRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          claimLifecycleStatus:
+            type: string
+            example: Rating Decision Complete
+    UpdateClaimTemporaryStationOfJurisdictionRequest:
+      title: UpdateClaimTemporaryStationOfJurisdictionRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          tempStationOfJurisdiction:
+            type: string
+            example: '281'
+    UpdateClaimLifecycleStatusResponse:
+      title: UpdateClaimLifecycleStatusResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    UpdateClaimTemporaryStationOfJurisdictionResponse:
+      title: UpdateClaimTemporaryStationOfJurisdictionResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    updateBenefitClaimTypeCodeRequest:
+      title: updateBenefitClaimTypeCodeRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - newBenefitClaimTypeCode
+        - ptcpntId
+        type: object
+        properties:
+          newBenefitClaimTypeCode:
+            type: string
+            example: 510PAR
+          ptcpntId:
+            type: string
+    updateBenefitClaimTypeCodeResponse:
+      title: updateBenefitClaimTypeCodeResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    CloseClaimRequest:
+      title: CloseClaimRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - lifecycleStatusReasonCode
+        type: object
+        properties:
+          lifecycleStatusReasonCode:
+            type: string
+            example: '65'
+          closeReasonText:
+            type: string
+    CloseClaimResponse:
+      title: CloseClaimResponse
+      allOf:
+      - "$ref": "#/components/schemas/ProviderResponse"
+    Claimant:
+      title: Claimant
+      required:
+      - participantId
       type: object
       properties:
-        code:
+        participantId:
+          maximum: 999999999999999
+          type: integer
+          description: The CorpDB Participant ID. The Claims API assumes the caller
+            will have obtained this value from MVI.
+          format: int64
+          example: 307405
+      description: A person making a claim, which could be the Veteran, one of their
+        dependents, or an organization acting on behalf of the Veteran.
+    PhaseType:
+      title: PhaseType
+      type: string
+      description: The PhaseType is the status value that used to populate the EVSS
+        ClaimStatus
+      enum:
+      - Claim Received
+      - Under Review
+      - Gathering of Evidence
+      - Review of Evidence
+      - Preparation for Decision
+      - Pending Decision Approval
+      - Preparation for Notification
+      - Complete
+    Veteran:
+      title: Veteran
+      required:
+      - firstName
+      - lastName
+      - participantId
+      type: object
+      properties:
+        participantId:
+          maximum: 999999999999999
+          type: integer
+          description: The CorpDB Participant ID. The Claims API assumes the caller
+            will have obtained this value from MVI.
+          format: int64
+          example: 320848
+        firstName:
+          type: string
+          example: RALPH
+        lastName:
+          type: string
+          example: HONEYMOONER
+      description: The minimal information to reference a Veteran in CorpDB.
+    ClaimsByVeteranRequest:
+      title: ClaimsByVeteranRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - veteranParticipantId
+        type: object
+        properties:
+          include_closed:
+            type: boolean
+            description: Whether or not to list closed claims. Default is false.
+            default: false
+          offset:
+            minimum: 0
+            type: integer
+            description: The number of items to skip before starting to collect the
+              claims to list
+            format: int32
+            default: 0
+          limit:
+            maximum: 100
+            minimum: 1
+            type: integer
+            description: The number of items to include in the page of results
+            format: int32
+            default: 20
+          veteranParticipantId:
+            type: integer
+            description: The veteran's CorpDB Participant ID.
+            format: int64
+          claimDate:
+            type: string
+            description: If set, only includes claims that were recieved before or
+              at the given date. If include_closed is false, will return claims that
+              were open at the provided date (they may have subsequently been closed).
+            format: date-time
+          serviceTypeCode:
+            type: string
+            description: If specified, only returns claims of the given service type.
+          programTypeCode:
+            type: string
+            description: If specified, only return claims of the given program type.
+    ClaimByIdRequest:
+      title: ClaimByIdRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - claimId
+        type: object
+        properties:
+          claimId:
+            type: integer
+            format: int64
+    ClaimSuspenseStatusesRequest:
+      title: ClaimSuspenseStatusesRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          claimId:
+            type: integer
+            format: int64
+          include_history:
+            type: boolean
+            description: Whether or not to list closed claims. Default is false.
+            default: false
+          reason_code:
+            type: string
+            description: If specified, only returns claims of the given service type.
+    ContentionsForClaimRequest:
+      title: ContentionsForClaimRequest
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - required:
+        - claimId
+        type: object
+        properties:
+          claimId:
+            type: integer
+            format: int64
+    BenefitClaimTypeLookupRequest:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          service_type_code:
+            type: string
+            description: Allows filtering on a given service type
+          program_type_code:
+            type: string
+            description: Allows filtering on a given program type
+          payee_type_code:
+            type: string
+            description: Allows filtering on a given payee type
+    ProgramTypeLookupRequest:
+      allOf:
+      - "$ref": "#/components/schemas/ProviderRequest"
+      - type: object
+        properties:
+          service_type_code:
+            type: string
+            description: Allows filtering on a given service_type.
+    AppToken:
+      title: AppToken
+      required:
+      - userId
+      - userKey
+      type: object
+      properties:
+        userId:
+          type: string
+        userKey:
+          type: string
+        applicationName:
+          type: string
+        stationOfJurisdiction:
+          type: string
+        isExternal:
+          type: boolean
+      description: test
+    Message:
+      title: Message
+      required:
+      - key
+      - severity
+      type: object
+      properties:
+        key:
+          type: string
+        severity:
+          type: string
+          enum:
+          - INFO
+          - WARN
+          - ERROR
+        status:
           type: integer
           format: int32
-        type:
+        text:
           type: string
-        message:
+        timestamp:
           type: string
+          format: date-time
+      description: Model that identifies a single individual used in the security
+        context
+      example:
+        severity: INFO
+        text: text
+        key: key
+        status: 0
+        timestamp: '2000-01-23T04:56:07.000+00:00'
+    Person:
+      title: Person
+      type: object
+      properties:
+        assuranceLevel:
+          minimum: 0
+          type: integer
+          description: The person's access assurance level
+          format: int32
+          example: 2
+        birthDate:
+          type: string
+          description: The person's birth date
+          format: date
+        correlationIds:
+          type: array
+          description: The MVI correlation IDs list for the person
+          example:
+          - 77779102^NI^200M^USVHA^P
+          - 912444689^PI^200BRLS^USVBA^A
+          - 6666345^PI^200CORP^USVBA^A
+          - 1105051936^NI^200DOD^USDOD^A
+          - 912444689^SS
+          items:
+            type: string
+        email:
+          type: string
+          description: The person's email address
+          example: jane.doe@va.gov
+        firstName:
+          type: string
+          description: The person's first name
+          example: JANE
+        gender:
+          type: string
+          description: The person's gender
+          example: FEMALE
+        lastName:
+          type: string
+          description: The person's last name
+          example: DOE
+        middleName:
+          type: string
+          description: The person's middle name
+          example: M
+        prefix:
+          type: string
+          description: The prefix for the person's full name
+          example: Ms
+        suffix:
+          type: string
+          description: The suffix for the person's full name
+          example: S
+        applicationID:
+          type: string
+          description: The application taking action on the record
+          example: ShareUI
+        stationID:
+          type: string
+          description: The number representing the Regional Office of the person or
+            service taking action on the record
+          example: '310'
+        userID:
+          type: string
+          description: The name associated with the person or service taking action
+            on the record
+          example: vhaislXXXXX
+        appToken:
+          type: string
+          description: Auditing and authentication credentials
+          format: json
+          example: |
+            {
+              "userId": "user id",
+              "userKey": "user key",
+              "applicationName": "app name",
+              "stationOfJurisdiction": "281",
+              "isExternal": true
+            }
+          deprecated: true
+      description: Model that identifies a single individual used in the security
+        context
+      example:
+        lastName: DOE
+        gender: FEMALE
+        prefix: Ms
+        appToken: |
+          {
+            "userId": "user id",
+            "userKey": "user key",
+            "applicationName": "app name",
+            "stationOfJurisdiction": "281",
+            "isExternal": true
+          }
+        assuranceLevel: 2
+        suffix: S
+        birthDate: '2000-01-23'
+        userID: vhaislXXXXX
+        firstName: JANE
+        correlationIds:
+        - 77779102^NI^200M^USVHA^P
+        - 912444689^PI^200BRLS^USVBA^A
+        - 6666345^PI^200CORP^USVBA^A
+        - 1105051936^NI^200DOD^USDOD^A
+        - 912444689^SS
+        middleName: M
+        applicationID: ShareUI
+        email: jane.doe@va.gov
+        stationID: '310'
+    ProviderResponse:
+      title: ProviderResponse
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            "$ref": "#/components/schemas/Message"
+      example:
+        messages:
+        - severity: INFO
+          text: text
+          key: key
+          status: 0
+          timestamp: '2000-01-23T04:56:07.000+00:00'
+        - severity: INFO
+          text: text
+          key: key
+          status: 0
+          timestamp: '2000-01-23T04:56:07.000+00:00'
+    ProviderRequest:
+      title: ProviderRequest
+      type: object
+  responses:
+    '400':
+      description: There was an error encountered processing the Request.  Response
+        will contain a  "messages" element that will provide further information on
+        the error.  This request shouldn't be retried until corrected.
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: bip.framework.global.validator.method.argument.not.valid
+              severity: ERROR
+              status: 400
+              text: Argument not valid.
+              timestamp: '2019-08-29T18:40:22.766Z'
+    '401':
+      description: The authentication mechanism failed and hence access is forbidden.
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: UNAUTHORIZED
+              severity: ERROR
+              status: 401
+              text: No JWT Token in Header.
+              timestamp: '2019-08-29T18:40:22.766Z'
+    '403':
+      description: The request is not authorized.  Please verify credentials used
+        in the request.
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: bip.framework.not.authorized.exception
+              severity: ERROR
+              status: 403
+              text: Access denied.
+              timestamp: '2019-08-29T18:40:22.766Z'
+    '404':
+      description: The requested resource could not be found.
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: bip.vetservices.claims.not.found
+              severity: ERROR
+              status: 404
+              text: Resource not found
+              timestamp: '2019-08-29T18:40:22.766Z'
+    '500':
+      description: There was an error encountered processing the Request.  Response
+        will contain a  "messages" element that will provide further information on
+        the error.  Please retry.  If problem persists, please contact support with
+        a copy of the Response.
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: bip.framework.global.general.exception
+              severity: ERROR
+              status: 500
+              text: Unexpected exception.
+              timestamp: '2019-08-29T18:40:22.766Z'
+    '501':
+      description: Resource not implemented
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+    Claim404:
+      description: Could not derive claim from request path
+      content:
+        application/problem+json:
+          schema:
+            "$ref": "#/components/schemas/ProviderResponse"
+          example:
+            messages:
+            - key: bip.vetservices.claims.claim.not.found
+              severity: ERROR
+              status: 404
+              text: Claim not found
+              timestamp: '2019-08-29T18:40:22.766Z'
+  parameters:
+    ClaimId:
+      name: claimId
+      in: path
+      description: The CorpDB BNFT_CLAIM_ID
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: integer
+        format: int64
+        example: 600049950
+    ContentionIds:
+      name: contentionIds
+      in: path
+      description: The contention IDs to operate on.
+      required: true
+      style: simple
+      explode: false
+      schema:
+        type: array
+        items:
+          type: integer
+          format: int64
   securitySchemes:
-    petstore_auth:
-      type: oauth2
-      flows:
-        implicit:
-          authorizationUrl: http://petstore.swagger.io/oauth/dialog
-          scopes:
-            write:pets: modify pets in your account
-            read:pets: read your pets
-    api_key:
+    Authorization:
       type: apiKey
-      name: api_key
+      name: Authorization
       in: header
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  links: {}
