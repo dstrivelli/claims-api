@@ -3,8 +3,7 @@ site_description: "This API provides functionality around the C&P Benefit Claim 
 site_addon: "n/a"
 
 nav:
-  - Introduction: index.md
-  - Other: other.md
+  - Overview: index.md
 
 plugins:
   - techdocs-core
