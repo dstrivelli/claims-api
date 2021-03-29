@@ -1,0 +1,14 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: "claims-api"
+  description: "This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information."
+  annotations:
+    github.com/project-slug: dstrivelli/claims-api
+    backstage.io/techdocs-ref: url:https://github.com/dstrivelli/claims-api
+spec:
+  type: service
+  lifecycle: experimental
+  owner: "claims"
+  providesApis:
+    - claims-api-api

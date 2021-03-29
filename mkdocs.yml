@@ -1,0 +1,10 @@
+site_name: "claims-api"
+site_description: "This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information."
+site_addon: "n/a"
+
+nav:
+  - Introduction: index.md
+  - Other: other.md
+
+plugins:
+  - techdocs-core
