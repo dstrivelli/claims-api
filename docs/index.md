@@ -1,17 +1,31 @@
-## claims-api
+# Claims
 
-This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information.
+## This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information.
 
-## Table
+## Veterans Claims API
+This API provides functionality around the C&P Benefit Claim
 
-| Syntax      | Description |
-| ----------- | ----------- |
-| Header      | Title       |
-| Paragraph   | Text        |
+The functionality falls within two primary areas.
+* Claim - The ability to create, list, and view summaries for a Veteran's claims.
+* Contention - The ability to create, list, and view contention summaries for a given claim.
 
+## Available Environments
+## Development
+https://claims-dev.dev8.bip.va.gov
 
-## Task List
+https://claims-int.dev8.bip.va.gov
 
-- [x] Write the press release
-- [ ] Update the website
-- [ ] Contact the media
+https://claims-test.dev8.bip.va.gov
+
+## Stage
+https://claims-demo.stage8.bip.va.gov
+
+https://claims-ivv.stage8.bip.va.gov
+
+https://claims-pat.stage8.bip.va.gov
+
+https://claims-pdt.stage8.bip.va.gov
+
+https://claims-preprod.stage8.bip.va.gov
+
+https://claims-uat.stage8.bip.va.gov
