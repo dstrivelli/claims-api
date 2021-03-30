@@ -24,10 +24,10 @@ externalDocs:
 servers:
 - url: https://claims-dev.dev8.bip.va.gov
   description: Development server
+- url: https://claims-test.dev8.bip.va.gov
+  description: "Testing/Integration server"
 - url: https://claims-ivv.stage8.bip.va.gov
   description: Staging server
-- url: https://claims-prod.prod8.bip.va.gov
-  description: Production server
 tags:
 - name: claims
   description: A tag that organizes resources directly associated with a claim.
