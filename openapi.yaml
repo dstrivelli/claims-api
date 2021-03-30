@@ -22,7 +22,12 @@ externalDocs:
   description: Complete documentation describing how to use this API
   url: https://github.ec.va.gov/EPMO/bip-vetservices-claims
 servers:
-- url: "/"
+- url: https://claims-dev.dev8.bip.va.gov
+  description: Development server
+- url: https://claims-ivv.stage8.bip.va.gov
+  description: Staging server
+- url: https://claims-prod.prod8.bip.va.gov
+  description: Production server
 tags:
 - name: claims
   description: A tag that organizes resources directly associated with a claim.
