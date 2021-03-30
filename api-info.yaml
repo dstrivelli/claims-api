@@ -2,7 +2,7 @@ apiVersion: backstage.io/v1alpha1
 kind: API
 metadata:
   name: claims-api
-  description: "This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information. If you would like to integrate with this service, please send a request to E_BIP_Platform_Support@bah.com to get a JWT authorization token for your app."
+  description: "This API provides functionality around the C&P Benefit Claim and seeks to provide simple and concise mechanisms to create and view claim information. If you would like to integrate with this service, please send a request to E_BIP_Platform_Support@bah.com to be onboarded."
   tags:
     - veterans
     - address
