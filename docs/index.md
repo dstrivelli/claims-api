@@ -5,8 +5,8 @@ This API provides functionality around the C&P Benefit Claim and seeks to provid
 This API provides functionality around the C&P Benefit Claim
 
 The functionality falls within two primary areas.
-- Claim - The ability to create, list, and view summaries for a Veteran's claims.
-- Contention - The ability to create, list, and view contention summaries for a given claim.
++   Claim - The ability to create, list, and view summaries for a Veteran's claims.
++   Contention - The ability to create, list, and view contention summaries for a given claim.
 
 ## Available Environments
 ### Development
